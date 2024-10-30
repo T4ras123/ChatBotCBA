@@ -23,7 +23,7 @@ with open("videos.json", "r", encoding="utf-8") as file:
 
 
 
-async def gpt_request(prompt, model="gpt-4o", temperature=0.7, max_tokens=500, top_p=1.0, frequency_penalty=0.0, presence_penalty=0.0):
+async def gpt_request(prompt, model="gpt-3.5-turbo-instruct", temperature=0.7, max_tokens=500, top_p=1.0, frequency_penalty=0.0, presence_penalty=0.0):
     url = "https://api.openai.com/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {config.openai_key.get_secret_value()}",
@@ -58,7 +58,7 @@ async def ask_gpt4o(message: Message):
         prompt = [
             {"role": "system", "content": "Please determine the language of the user's query and respond in that language. If the user's query is in Armenian, respond in Armenian; if it's in English, respond in English; if it's in Russian, respond in Russian."},
             {"role": "system", "content": "You are an assistant who answers users' questions based on the database and your priar knowledge. The data contains titles, descriptions, and video links."},
-            {"role": "system", "content": "Don't lie, don't make things up, don't halusinate. Only respond with true and reliable information."}
+            {"role": "system", "content": "Don't lie, don't make things up, don't halusinate. Only respond with true and reliable information."},
             {"role": "user", "content": f"Here are the details about the videos: {videos_content}"},
             {"role": "user", "content": f"The user is asking: {user_query}. Using the video data and other information, answer their query."},
             {"role": "user", "content": "Please respond in plain text and display links as regular text without Markdown formatting. Only return links if the langiage of the user is Armenian."}
