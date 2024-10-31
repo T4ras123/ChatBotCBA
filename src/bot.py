@@ -23,7 +23,7 @@ with open("videos.json", "r", encoding="utf-8") as file:
 
 
 
-async def gpt_request(prompt, model="gpt-3.5-turbo", temperature=0.7, max_tokens=500, top_p=1.0, frequency_penalty=0.0, presence_penalty=0.0):
+async def gpt_request(prompt, model="gpt-4o", temperature=0.7, max_tokens=500, top_p=1.0, frequency_penalty=0.0, presence_penalty=0.0):
     url = "https://api.openai.com/v1/chat/completions"
     headers = {
         "Authorization": f"Bearer {config.openai_key.get_secret_value()}",
