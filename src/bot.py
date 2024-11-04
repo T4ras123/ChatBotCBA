@@ -57,7 +57,7 @@ async def ask_gpt4o(message: Message):
     try:
         prompt = [
             {"role": "system", "content": "Please determine the language of the user's query and respond in that language. If the user's query is in Armenian, respond in Armenian; if it's in English, respond in English; if it's in Russian, respond in Russian."},
-            {"role": "system", "content": "You are an assistant who answers users' questions based on the database and your priar knowledge. The data contains titles, descriptions, and video links."},
+            {"role": "system", "content": "You are an assistant who answers users' questions based on the database, don't answer questions, information about which is not included there. The data contains titles, descriptions, and video links."},
             {"role": "system", "content": "Don't lie, don't make things up, don't halusinate. Only respond with true and reliable information."},
             {"role": "user", "content": f"Here are the details about the videos: {videos_content}"},
             {"role": "user", "content": f"The user is asking: {user_query}. Using the video data and other information, answer their query."},
