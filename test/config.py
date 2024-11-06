@@ -1,3 +1,5 @@
-token = "7766329100:AAEu6fxUwmMNGKESVjKNlF5EdJtRu8235dg"
-key = "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"
+# config.py
+import os
 
+token = os.getenv('BOT_TOKEN')
+key = os.getenv('OPENAI_KEY')

@@ -1,7 +1,6 @@
 import json
 import logging
 import aiohttp  # Асинхронные запросы
-from config import token, key
 from handle_errors import handle_errors  # Импортируем функцию из отдельного модуля
 from aiogram import Bot, Dispatcher, Router
 from aiogram.client.bot import DefaultBotProperties
@@ -9,6 +8,12 @@ from aiogram.filters import Command
 from aiogram.types import Message
 import asyncio
 from collections import deque
+import os
+from dotenv import load_dotenv
+load_dotenv()  # take environment variables from .env.
+
+token = os.getenv('BOT_TOKEN')
+key = os.getenv('OPENAI_KEY')
 
 
 # Включаем логирование для отладки
@@ -41,8 +46,8 @@ async def ask_gpt_async(model, messages, temperature=0.7, max_tokens=500, top_p=
         async with session.post(url, headers=headers, json=payload) as response:
             error_response = await handle_errors(response)
             if error_response:
-                return error_response
-
+                # Decide whether to return the error response or raise an exception
+                return error_response  # Or raise an exception
             result = await response.json()
             return result["choices"][0]["message"]["content"].strip()
 
