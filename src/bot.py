@@ -47,6 +47,7 @@ async def gpt_request(prompt, model="gpt-4o", temperature=0.7, max_tokens=500, t
             else:
                 raise Exception(f"Error {response.status}: {await response.text()}")
 
+cache = []
 
 @router.message()
 async def ask_gpt4o(message: Message):
@@ -54,25 +55,37 @@ async def ask_gpt4o(message: Message):
     
     await message.bot.send_chat_action(chat_id=message.chat.id, action="typing")
 
-    try:
-        prompt = [
-            {"role": "system", "content": "Please determine the language of the user's query and respond in that language. If the user's query is in Armenian, respond in Armenian; if it's in English, respond in English; if it's in Russian, respond in Russian."},
-            {"role": "system", "content": "You are an assistant who answers users' questions based on the database, don't answer questions, information about which is not included there. The data contains titles, descriptions, and video links."},
-            {"role": "system", "content": "Don't lie, don't make things up, don't halusinate. Only respond with true and reliable information."},
-            {"role": "user", "content": f"Here are the details about the videos: {videos_content}"},
-            {"role": "user", "content": f"The user is asking: {user_query}. Using the video data and other information, answer their query."},
-            {"role": "user", "content": "Please respond in plain text and display links as regular text without Markdown formatting. Only return links if the langiage of the user is Armenian."}
-        ]
+    if user_query in cache:
+        pass
+    if user_query not in cache and len(cache) > 10:
+        cache.pop(0)
+        cache.append(user_query)
+    else:
+        cache.append(user_query)
+    
+    await message.reply(f"Cache: {cache}")
+    
+    print(cache)
+    
+    # try:
+    #     prompt = [
+    #         {"role": "system", "content": "Please determine the language of the user's query and respond in that language. If the user's query is in Armenian, respond in Armenian; if it's in English, respond in English; if it's in Russian, respond in Russian."},
+    #         {"role": "system", "content": "You are an assistant who answers users' questions based on the database, don't answer questions, information about which is not included there. The data contains titles, descriptions, and video links."},
+    #         {"role": "system", "content": "Don't lie, don't make things up, don't halusinate. Only respond with true and reliable information."},
+    #         {"role": "user", "content": f"Here are the details about the videos: {videos_content}"},
+    #         {"role": "user", "content": f"The user is asking: {user_query}. Using the video data and other information, answer their query."},
+    #         {"role": "user", "content": "Please respond in plain text and display links as regular text without Markdown formatting. Only return links if the langiage of the user is Armenian."}
+    #     ]
 
-        gpt_response = await gpt_request(
-            prompt=prompt
-        )
-        await message.reply(text=gpt_response)
-        logging.info("Request went through.")
+    #     gpt_response = await gpt_request(
+    #         prompt=prompt
+    #     )
+    #     await message.reply(text=gpt_response)
+    #     logging.info("Request went through.")
 
-    except Exception as e:
-        logging.error(f"Error raised trying to access GPT: {e}")
-        await message.reply("Ձեր հարցումը մշակելիս սխալ տեղի ունեցավ: Խնդրում ենք փորձել մի փոքր ուշ.")
+    # except Exception as e:
+    #     logging.error(f"Error raised trying to access GPT: {e}")
+    #     await message.reply("Ձեր հարցումը մշակելիս սխալ տեղի ունեցավ: Խնդրում ենք փորձել մի փոքր ուշ.")
 
 
 @dp.message(Command("start"))

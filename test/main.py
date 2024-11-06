@@ -8,6 +8,8 @@ from aiogram.client.bot import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.types import Message
 import asyncio
+from collections import deque
+
 
 # Включаем логирование для отладки
 logging.basicConfig(level=logging.INFO)  # глобальное логирование
@@ -51,6 +53,9 @@ async def start_command(message: Message):
     logging.info(f"User {user_name} вызвал команду /start")
     await message.reply(f"Բարև, {user_name}! Ինչով կարող եմ օգնել?")
 
+
+user_caches = {}
+
 # Обработчик текстовых вариантов команды "start"
 @router.message()
 async def ask_gpt4o(message: Message):
@@ -60,6 +65,15 @@ async def ask_gpt4o(message: Message):
         return
 
     user_query = message.text.lower()
+    user_id = message.from_user.id
+
+    if user_id not in user_caches:
+        user_caches[user_id] = deque(maxlen=10)
+    
+    user_caches[user_id].append({"role": "user", "content": user_query})
+    conversation_history = list(user_caches[user_id])
+
+    
     if user_query in ["start", "старт", "ստարտ"]:
         user_name = message.from_user.first_name
         logging.info(f"User {user_name} отправил сообщение {user_query}")
@@ -75,24 +89,28 @@ async def ask_gpt4o(message: Message):
     # Запускаем задачу индикатора
     typing_task = asyncio.create_task(show_typing_indicator())
 
-    try:
-        videos_content = "\n".join(
-            [f"{video['title']}\n\n {video['text']}\n\n {video['link']}" for video in videos_data])
-        messages = [
-            {"role": "system", "content": "Խնդրում ենք, որոշել օգտատիրոջ հարցման լեզուն և պատասխանել այդ լեզվով: Եթե օգտատիրոջ հարցումը հայերեն է, ապա պատասխանիր հայերեն, եթե անգլերեն է, ապա պատասխանիր անգլերեն, եթե ռուսերեն է, ապա պատասխանիր ռուսերեն:"},
-            {"role": "system", "content": "Խնդրում ենք պատասխանել միայն տվյալների բազայի բովանդակությանը համապատասխան: Եթե հարցումը չի վերաբերում տվյալների բազայում առկա տեղեկություններին, պատասխանեք հետևյալ տեքստով՝ 'Ձեր հարցման վերաբերյալ նյութեր չեն գտնվել:'"},
-            {"role": "system", "content": "Դուք օգնական եք, ով պատասխանում է օգտատերերի հարցերին՝ միայն տվյալների բազայի հիման վրա: Պատասխանը պետք է ներառի համապատասխան հղումներ, եթե դրանք առկա են տվյալների բազայում: Խնդրում ենք օգտագործել միայն տվյալների բազայի տեղեկատվությունը պատասխանների համար: Տվյալները պարունակում են վերնագրեր, նկարագրություններ և տեսանյութերի հղումներ:"},
-            {"role": "system", "content": "Եթե օգտատիրոջ հարցմանը տվյալների բազայում ուղիղ համապատասխանություն չկա, խնդրում ենք տրամաբանական պատասխան տալ՝ օգտագործելով տվյալների բազայում առկա նյութերը՝ դրանք առավել ամբողջական և տրամաբանական դարձնելու համար:"},
-            {"role": "system", "content": f"Ստորև բերված է տվյալների բազայի պարունակությունը. {videos_content}"},
-            {"role": "user", "content": f"Օգտատերը հարցնում է. {user_query}. Օգտագործելով միայն տեսանյութի տվյալները և տվյալների բազայի այլ տվյալներ՝ պատասխանեք նրա հարցմանը:"},
-            {"role": "user", "content": "Խնդրում ենք պատասխանել պարզ տեքստով և հղումները ցուցադրել որպես սովորական տեքստ՝ առանց Markdown ձևավորման:"}
-        ]
 
+    videos_content = "\n".join(
+        [f"{video['title']}\n\n {video['text']}\n\n {video['link']}" for video in videos_data])
+    messages = [
+        {"role": "system", "content": "Խնդրում ենք, որոշել օգտատիրոջ հարցման լեզուն և պատասխանել այդ լեզվով: Եթե օգտատիրոջ հարցումը հայերեն է, ապա պատասխանիր հայերեն, եթե անգլերեն է, ապա պատասխանիր անգլերեն, եթե ռուսերեն է, ապա պատասխանիր ռուսերեն:"},
+        {"role": "system", "content": "Խնդրում ենք պատասխանել միայն տվյալների բազայի բովանդակությանը համապատասխան: Եթե հարցումը չի վերաբերում տվյալների բազայում առկա տեղեկություններին, պատասխանեք հետևյալ տեքստով՝ 'Ձեր հարցման վերաբերյալ նյութեր չեն գտնվել:'"},
+        {"role": "system", "content": "Դուք օգնական եք, ով պատասխանում է օգտատերերի հարցերին՝ միայն տվյալների բազայի հիման վրա: Պատասխանը պետք է ներառի համապատասխան հղումներ, եթե դրանք առկա են տվյալների բազայում: Խնդրում ենք օգտագործել միայն տվյալների բազայի տեղեկատվությունը պատասխանների համար: Տվյալները պարունակում են վերնագրեր, նկարագրություններ և տեսանյութերի հղումներ:"},
+        {"role": "system", "content": "Եթե օգտատիրոջ հարցմանը տվյալների բազայում ուղիղ համապատասխանություն չկա, խնդրում ենք տրամաբանական պատասխան տալ՝ օգտագործելով տվյալների բազայում առկա նյութերը՝ դրանք առավել ամբողջական և տրամաբանական դարձնելու համար:"},
+        {"role": "system", "content": f"Ստորև բերված է տվյալների բազայի պարունակությունը. {videos_content}"},
+        {"role": "user", "content": f"Օգտատերը հարցնում է. {user_query}. Օգտագործելով միայն տեսանյութի տվյալները և տվյալների բազայի այլ տվյալներ՝ պատասխանեք նրա հարցմանը:"},
+        {"role": "user", "content": "Խնդրում ենք պատասխանել պարզ տեքստով և հղումները ցուցադրել որպես սովորական տեքստ՝ առանց Markdown ձևավորման:"}
+    ]
+    messages.extend(conversation_history)
+    
+    try:
         gpt_response = await ask_gpt_async(model="gpt-4o", messages=messages)
+        user_caches[user_id].append({"role": "assistant", "content": gpt_response})
+
 
         # Останавливаем задачу индикатора после получения ответа
         typing_task.cancel()
-
+        
         await message.reply(text=gpt_response)
 
     except Exception as e:
