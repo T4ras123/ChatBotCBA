@@ -84,16 +84,18 @@ class TestMain(unittest.IsolatedAsyncioTestCase):
         message.text = "Test query"
         message.from_user = MagicMock()
         message.from_user.id = 12345
+        message.chat = MagicMock()
+        message.chat.id = 67890
         message.bot = AsyncMock()
+        message.bot.send_chat_action = AsyncMock()
         message.reply = AsyncMock()
 
-        with patch('asyncio.create_task', return_value=AsyncMock()):
-            with patch('main.ask_gpt_async', return_value="Test response"):
-                await ask_gpt4o(message)
-                # Check that the response is added to user_caches
-                self.assertIn(12345, user_caches)
-                self.assertEqual(len(user_caches[12345]), 2)
-                message.reply.assert_called_once_with(text="Test response")
+        with patch('main.ask_gpt_async', return_value="Test response"):
+            await ask_gpt4o(message)
+            # Check that the response is added to user_caches
+            self.assertIn(12345, user_caches)
+            self.assertEqual(len(user_caches[12345]), 2)
+            message.reply.assert_called_once_with(text="Test response")
 
 if __name__ == '__main__':
     unittest.main()
