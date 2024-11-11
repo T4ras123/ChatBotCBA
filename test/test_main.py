@@ -3,6 +3,9 @@
 import unittest
 from unittest.mock import AsyncMock, patch, MagicMock
 from openai_requests import ask_gpt_async  # Corrected import
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from main import start_command, ask_gpt4o, user_caches  # Ensure correct import from project root
 from aiogram.types import Message
 import pytest
@@ -58,25 +61,19 @@ class TestMain(unittest.IsolatedAsyncioTestCase):
             mock_message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
             self.assertIn(123, user_caches)
 
-@patch('main.start_command')
-@patch('aiogram.Bot')
-@patch('aiogram.Dispatcher')
-@pytest.mark.asyncio
-async def test_start_command_pytest(mock_dispatcher, mock_bot, mock_start_command):
-    message = AsyncMock()
+    @patch('main.start_command')
+    @patch('aiogram.Bot')
+    @patch('aiogram.Dispatcher')
+    @pytest.mark.asyncio
+    async def test_start_command_pytest(mock_dispatcher, mock_bot, mock_start_command):
+        message = AsyncMock()
         message.from_user.first_name = "TestUser"
-    message.from_user.first_name = "TestUser"
-    message.reply = AsyncMock()
-    
+        message.from_user.first_name = "TestUser"
+        message.reply = AsyncMock()
+        
         await start_command(message)
         message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
 
 if __name__ == '__main__':
     unittest.main()
-    await start_command(message)
-    message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
 
-if __name__ == '__main__':
-    unittest.main()
-        message.reply = AsyncMock()
-        
