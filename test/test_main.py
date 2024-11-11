@@ -2,8 +2,11 @@
 
 import unittest
 from unittest.mock import AsyncMock, patch, MagicMock
-from main import ask_gpt_async, start_command, ask_gpt4o, user_caches
+from openai_requests import ask_gpt_async  # Corrected import
+from main import start_command, ask_gpt4o, user_caches  # Ensure correct import from project root
 from aiogram.types import Message
+import pytest
+from aiogram import Bot, Dispatcher
 
 class TestMain(unittest.IsolatedAsyncioTestCase):
 
@@ -32,6 +35,14 @@ class TestMain(unittest.IsolatedAsyncioTestCase):
 
         mock_message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
 
+    async def test_ask_gpt4o_no_text(self):
+        mock_message = MagicMock(spec=Message)
+        mock_message.text = None
+        mock_message.reply = AsyncMock()
+
+        await ask_gpt4o(mock_message)
+        mock_message.reply.assert_awaited_with("Ես կարող եմ մշակել միայն տեքստային հաղորդագրությունները: Խնդրում ենք ուղարկել только текст:")
+
     async def test_ask_gpt4o_start_command(self):
         mock_message = MagicMock(spec=Message)
         mock_message.from_user = MagicMock()
@@ -47,6 +58,25 @@ class TestMain(unittest.IsolatedAsyncioTestCase):
             mock_message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
             self.assertIn(123, user_caches)
 
+@patch('main.start_command')
+@patch('aiogram.Bot')
+@patch('aiogram.Dispatcher')
+@pytest.mark.asyncio
+async def test_start_command_pytest(mock_dispatcher, mock_bot, mock_start_command):
+    message = AsyncMock()
+        message.from_user.first_name = "TestUser"
+    message.from_user.first_name = "TestUser"
+    message.reply = AsyncMock()
+    
+        await start_command(message)
+        message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
 
 if __name__ == '__main__':
     unittest.main()
+    await start_command(message)
+    message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
+
+if __name__ == '__main__':
+    unittest.main()
+        message.reply = AsyncMock()
+        
