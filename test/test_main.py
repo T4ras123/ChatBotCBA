@@ -65,7 +65,6 @@ class TestMain(unittest.IsolatedAsyncioTestCase):
         await start_command(message)
         message.reply.assert_called_once_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
 
-    # ... [other tests remain unchanged] ...
 
 if __name__ == '__main__':
     unittest.main()
