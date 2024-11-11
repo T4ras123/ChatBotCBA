@@ -11,30 +11,44 @@ from aiogram.types import Message
 
 class TestMain(unittest.IsolatedAsyncioTestCase):
     async def test_ask_gpt_async_success(self):
+        # Mock response
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json.return_value = {
+        mock_response.json = AsyncMock(return_value={
             "choices": [{
                 "message": {
                     "content": "Test response"
                 }
             }]
-        }
-        mock_session = AsyncMock()
-        mock_session.post.return_value.__aenter__.return_value = mock_response
+        })
 
-        with patch('aiohttp.ClientSession', return_value=mock_session):
+        # Mock session.post()
+        mock_post_cm = AsyncMock()
+        mock_post_cm.__aenter__.return_value = mock_response
+
+        # Mock aiohttp.ClientSession()
+        mock_session_cm = AsyncMock()
+        mock_session_cm.__aenter__.return_value = AsyncMock(post=AsyncMock(return_value=mock_post_cm))
+
+        with patch('aiohttp.ClientSession', return_value=mock_session_cm):
             result = await ask_gpt_async(model="gpt-4", messages=[])
             self.assertEqual(result, "Test response")
 
     async def test_ask_gpt_async_error(self):
+        # Mock response
         mock_response = AsyncMock()
         mock_response.status = 400
-        mock_response.text.return_value = "Bad Request"
-        mock_session = AsyncMock()
-        mock_session.post.return_value.__aenter__.return_value = mock_response
+        mock_response.text = AsyncMock(return_value="Bad Request")
 
-        with patch('aiohttp.ClientSession', return_value=mock_session):
+        # Mock session.post()
+        mock_post_cm = AsyncMock()
+        mock_post_cm.__aenter__.return_value = mock_response
+
+        # Mock aiohttp.ClientSession()
+        mock_session_cm = AsyncMock()
+        mock_session_cm.__aenter__.return_value = AsyncMock(post=AsyncMock(return_value=mock_post_cm))
+
+        with patch('aiohttp.ClientSession', return_value=mock_session_cm):
             result = await ask_gpt_async(model="gpt-4", messages=[])
             self.assertEqual(result, "Տեղի ունեցել սխալ․ 400")
 
@@ -73,7 +87,7 @@ class TestMain(unittest.IsolatedAsyncioTestCase):
         message.bot = AsyncMock()
         message.reply = AsyncMock()
 
-        with patch('asyncio.create_task'):
+        with patch('asyncio.create_task', return_value=AsyncMock()):
             with patch('main.ask_gpt_async', return_value="Test response"):
                 await ask_gpt4o(message)
                 # Check that the response is added to user_caches
