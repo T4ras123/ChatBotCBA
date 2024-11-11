@@ -1,5 +1,7 @@
-# config.py
 import os
+from dotenv import load_dotenv
 
-token = os.getenv('BOT_TOKEN')
-key = os.getenv('OPENAI_KEY')
+load_dotenv()
+
+key = os.getenv('OPENAI_API_KEY')
+token = os.getenv('TELEGRAM_BOT_TOKEN')
