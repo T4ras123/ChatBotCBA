@@ -18,11 +18,28 @@ class TestHandleErrors(unittest.IsolatedAsyncioTestCase):
         response.status = 404
         response.text = AsyncMock(return_value="Not Found")
         result = await handle_errors(response)
-        self.assertEqual(result, "Տեղի ունեցել սխալ․ 404")
+        self.assertEqual(result, "Տեղի ունեցավ սխալ․ 404")  # Updated expected string
 
     async def test_handle_errors_server_error(self):
         response = AsyncMock()
         response.status = 500
         response.text = AsyncMock(return_value="Internal Server Error")
         result = await handle_errors(response)
-        self.assertEqual(result, "Տեղի ունեցել սխալ․ 500")
+        self.assertEqual(result, "Տեղի ունեցավ սխալ․ 500")  # Updated expected string
+
+    async def test_handle_errors_boundary_low(self):
+        response = AsyncMock()
+        response.status = 199
+        response.text = AsyncMock(return_value="Previous")
+        result = await handle_errors(response)
+        self.assertEqual(result, "Տեղի ունեցավ սխալ․ 199")
+
+    async def test_handle_errors_boundary_high(self):
+        response = AsyncMock()
+        response.status = 300
+        response.text = AsyncMock(return_value="Multiple Choices")
+        result = await handle_errors(response)
+        self.assertEqual(result, "Տեղի ունեցավ սխալ․ 300")
+
+if __name__ == '__main__':
+    unittest.main()

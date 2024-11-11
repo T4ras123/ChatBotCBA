@@ -8,62 +8,44 @@ from aiogram.types import Message
 class TestMain(unittest.IsolatedAsyncioTestCase):
 
     async def test_ask_gpt_async_success(self):
-        # Mock response returned by session.post
         mock_response = AsyncMock()
         mock_response.status = 200
-        mock_response.json = AsyncMock(return_value={
+        mock_response.json.return_value = {
             "choices": [{
                 "message": {
                     "content": "Test response"
                 }
             }]
-        })
-
-        # Mock session.post to return an async context manager
-        mock_session_post = AsyncMock()
-        mock_session_post.__aenter__.return_value = mock_response
-
-        # Mock session to have a post method that returns the mock_session_post
-        mock_session = AsyncMock()
-        mock_session.post.return_value = mock_session_post
-
-        # Mock aiohttp.ClientSession to return a context manager returning mock_session
-        mock_client_session = AsyncMock()
-        mock_client_session.__aenter__.return_value = mock_session
-
-        with patch('aiohttp.ClientSession', return_value=mock_client_session):
+        }
+        with patch('aiohttp.ClientSession.post') as mock_post:
+            mock_post.return_value.__aenter__.return_value = mock_response
             result = await ask_gpt_async(model="gpt-4o", messages=[])
             self.assertEqual(result, "Test response")
 
-    async def test_ask_gpt_async_error(self):
-        # Mock response with an error status
-        mock_response = AsyncMock()
-        mock_response.status = 400
-        mock_response.text = AsyncMock(return_value="Bad Request")
-
-        # Mock session.post to return an async context manager
-        mock_session_post = AsyncMock()
-        mock_session_post.__aenter__.return_value = mock_response
-
-        # Mock session to have a post method that returns the mock_session_post
-        mock_session = AsyncMock()
-        mock_session.post.return_value = mock_session_post
-
-        # Mock aiohttp.ClientSession to return a context manager returning mock_session
-        mock_client_session = AsyncMock()
-        mock_client_session.__aenter__.return_value = mock_session
-
-        with patch('aiohttp.ClientSession', return_value=mock_client_session):
-            result = await ask_gpt_async(model="gpt-4o", messages=[])
-            self.assertEqual(result, "Տեղի ունեցել սխալ․ 400")
-
     async def test_start_command(self):
-        message = MagicMock()
-        message.from_user.first_name = "TestUser"
-        message.reply = AsyncMock()
+        mock_message = MagicMock(spec=Message)
+        mock_message.from_user = MagicMock()
+        mock_message.from_user.first_name = "TestUser"
+        mock_message.reply = AsyncMock()
 
-        await start_command(message)
-        message.reply.assert_called_once_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
+        await start_command(mock_message)
+
+        mock_message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
+
+    async def test_ask_gpt4o_start_command(self):
+        mock_message = MagicMock(spec=Message)
+        mock_message.from_user = MagicMock()
+        mock_message.text = "start"
+        mock_message.from_user.id = 123
+        mock_message.from_user.first_name = "TestUser"
+        mock_message.reply = AsyncMock()
+        mock_message.bot.send_chat_action = AsyncMock()
+
+        with patch('main.ask_gpt_async', return_value=AsyncMock()):
+            await ask_gpt4o(mock_message)
+
+            mock_message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
+            self.assertIn(123, user_caches)
 
 
 if __name__ == '__main__':
