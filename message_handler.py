@@ -20,6 +20,7 @@ async def ask_gpt4o(message: Message):
     
     if not is_allowed_message(id):
         message.reply('Too many requests for today. Please try again tomorrow.')
+        return 0
         
 
     user_query = message.text.lower()
