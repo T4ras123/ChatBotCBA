@@ -1,15 +1,18 @@
 # test_main.py
 
+
 import unittest
 from unittest.mock import AsyncMock, patch, MagicMock
-from openai_requests import ask_gpt_async  # Corrected import
 import sys
 import os
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-from main import start_command, ask_gpt4o, user_caches  # Ensure correct import from project root
+
+# Add the parent directory to sys.path
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+
+from main import ask_gpt_async, start_command, ask_gpt4o, user_caches
 from aiogram.types import Message
-import pytest
-from aiogram import Bot, Dispatcher
+
 
 class TestMain(unittest.IsolatedAsyncioTestCase):
 
