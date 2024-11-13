@@ -1,31 +1,80 @@
-import psycopg
+import asyncpg
 from datetime import datetime
+from typing import Optional
+import logging
 
-conn = psycopg.connect('users.db')
-cursor = conn.cursor()
+# Database connection pool
+pool: Optional[asyncpg.Pool] = None
 
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS daily_usage (
-        user_id INTEGER REFERENCES users(id),
-        date DATE NOT NULL,
-        usage_count INTEGER DEFAULT 0,
-        PRIMARY KEY (user_id, date)
+async def init_db():
+    """Initialize database connection pool"""
+    global pool
+    pool = await asyncpg.create_pool(
+        user='postgres',
+        password='your_password',  # Move to config
+        database='your_database',
+        host='localhost'
     )
-''')
-conn.commit()
+
+    # Create tables if they don't exist
+    async with pool.acquire() as conn:
+        await conn.execute('''
+            CREATE TABLE IF NOT EXISTS daily_usage (
+                user_id BIGINT REFERENCES users(id),
+                date DATE NOT NULL,
+                usage_count INTEGER DEFAULT 0,
+                PRIMARY KEY (user_id, date)
+            )
+        ''')
+
+async def is_allowed_message(user_id: int) -> bool:
+    """Check if user hasn't exceeded daily limit"""
+    if not pool:
+        await init_db()
         
-def is_allowed_message(id):
-    with psycopg.connect("dbname=example") as conn:
-        with conn.cursor() as cur:
+    async with pool.acquire() as conn:
+        try:
             today = datetime.today().date()
-            cur.execute("SELECT usage_count FROM daily_usage WHERE user_id = %s AND date = %s", (id, today))
-            result = cur.fetchone()
-            if result and result[0] >= 50:
+            
+            # Get current usage
+            row = await conn.fetchrow(
+                '''
+                SELECT usage_count 
+                FROM daily_usage 
+                WHERE user_id = $1 AND date = $2
+                ''',
+                user_id, today
+            )
+
+            if row and row['usage_count'] >= 50:
                 return False
+
+            # Update or insert usage count
+            if row:
+                await conn.execute(
+                    '''
+                    UPDATE daily_usage 
+                    SET usage_count = usage_count + 1 
+                    WHERE user_id = $1 AND date = $2
+                    ''',
+                    user_id, today
+                )
             else:
-                if result:
-                    cur.execute("UPDATE daily_usage SET usage_count = usage_count + 1 WHERE user_id = %s AND date = %s", (id, today))
-                else:
-                    cur.execute("INSERT INTO daily_usage (user_id, date, usage_count) VALUES (%s, %s, 1)", (id, today))
-                conn.commit()
-                return True
+                await conn.execute(
+                    '''
+                    INSERT INTO daily_usage (user_id, date, usage_count) 
+                    VALUES ($1, $2, 1)
+                    ''',
+                    user_id, today
+                )
+            
+            return True
+            
+        except Exception as e:
+            logging.error(f"Database error: {e}")
+            return False
+
+# Clean up connection pool on shutdown
+async def cleanup():
+    if pool:
+        await pool.close()
