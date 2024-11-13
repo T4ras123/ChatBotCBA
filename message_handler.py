@@ -3,16 +3,24 @@ import logging
 import json
 from openai_requests import ask_gpt_async
 from aiogram.types import Message
+from database import is_allowed_message
 
 # Загрузка данных из videos.json
 with open("videos.json", "r", encoding="utf-8") as file:
     videos_data = json.load(file)
 
 async def ask_gpt4o(message: Message):
+    
+    id = message.from_user.id
+    user_name = message.from_user.first_name
     # Проверяем, есть ли текст в сообщении
     if not message.text:
         await message.reply("Ես կարող եմ մշակել միայն տեքստային հաղորդագրությունները: Խնդրում ենք ուղարկել только текст:")
         return
+    
+    if not is_allowed_message(id):
+        message.reply('Too many requests for today. Please try again tomorrow.')
+        
 
     user_query = message.text.lower()
     if user_query in ["start", "старт", "ստարտ"]:
