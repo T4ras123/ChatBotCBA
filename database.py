@@ -13,7 +13,8 @@ async def init_db():
         user='postgres',
         password='your_password',  # Move to config
         database='your_database',
-        host='localhost'
+        host='localhost',
+        port='6432'
     )
 
     # Create tables if they don't exist
