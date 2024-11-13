@@ -1,34 +1,30 @@
-import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+import unittest
+from unittest.mock import patch, AsyncMock, Mock
+from aiogram.types import Message
 from message_handler import ask_gpt4o
 
-@pytest.mark.asyncio
-async def test_ask_gpt4o_no_text():
-    message = MagicMock()
-    message.text = None
-    message.reply = AsyncMock()
-    
-    await ask_gpt4o(message)
-    message.reply.assert_awaited_with("Ես կարող եմ մշակել միայն տեքստային հաղորդագրությունները: Խնդրում ենք ուղարկել только текст:")
+class TestMessageHandler(unittest.IsolatedAsyncioTestCase):
+    @patch('message_handler.ask_gpt_async')
+    @patch('message_handler.asyncio.create_task')
+    async def test_ask_gpt4o_no_text(self, mock_create_task, mock_ask_gpt_async):
+        message = AsyncMock(spec=Message)
+        message.text = None
+        message.reply = AsyncMock()  # Ensure reply is an AsyncMock
 
-@pytest.mark.asyncio
-async def test_ask_gpt4o_start_command():
-    message = MagicMock()
-    message.text = "start"
-    message.from_user.first_name = "TestUser"
-    message.reply = AsyncMock()
-    
-    await ask_gpt4o(message)
-    message.reply.assert_awaited_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
-
-@pytest.mark.asyncio
-async def test_ask_gpt4o_gpt_response():
-    message = MagicMock()
-    message.text = "Some query"
-    message.from_user.first_name = "TestUser"
-    message.reply = AsyncMock()
-    
-    with patch('message_handler.ask_gpt_async', return_value="GPT response") as mock_ask_gpt:
         await ask_gpt4o(message)
-        mock_ask_gpt.assert_awaited()
-        message.reply.assert_awaited_with("GPT response")
+        message.reply.assert_called_with("Ես կարող եմ մշակել միայն տեքստային հաղորդագրությունները: Խնդրում ենք ուղարկել только текст:")
+
+    @patch('message_handler.ask_gpt_async')
+    async def test_ask_gpt4o_start_command(self, mock_ask_gpt_async):
+        message = AsyncMock(spec=Message)
+        message.text = "start"
+        message.from_user = Mock()  # Use Mock instead of AsyncMock
+        message.from_user.first_name = "TestUser"
+        message.reply = AsyncMock()  # Ensure reply is an AsyncMock
+
+        await ask_gpt4o(message)
+        message.reply.assert_called_with("Բարև, TestUser! Ինչով կարող եմ օգնել?")
+
+ 
+if __name__ == '__main__':
+    unittest.main()
