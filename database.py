@@ -5,14 +5,6 @@ conn = psycopg.connect('users.db')
 cursor = conn.cursor()
 
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT UNIQUE NOT NULL
-    )
-''')
-conn.commit()
-
-cursor.execute('''
     CREATE TABLE IF NOT EXISTS daily_usage (
         user_id INTEGER REFERENCES users(id),
         date DATE NOT NULL,
