@@ -25,7 +25,6 @@ async def ask_gpt4o(message: Message):
 
     user_query = message.text.lower()
     if user_query in ["start", "старт", "ստարտ"]:
-        user_name = message.from_user.first_name
         logging.info(f"User {user_name} отправил сообщение {user_query}")
         await message.reply(f"Բարև, {user_name}! Ինչով կարող եմ օգնել?")
         return
