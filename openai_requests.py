@@ -34,6 +34,7 @@ async def ask_gpt_async(model, messages, temperature=0.7, max_tokens=500, top_p=
     except ConnectionError:
         logging.error("COnnection error")
         return "Connection error"
+    
     except Exception as e:
         logging.error(f"Unknown error: {e}")
         return "Error"
