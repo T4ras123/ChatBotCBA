@@ -1,81 +1,88 @@
-import asyncpg
+import aiosqlite
 from datetime import datetime
-from typing import Optional
 import logging
 
-# Database connection pool
-pool: Optional[asyncpg.Pool] = None
+# Database file path
+db_path = 'request.db'
 
 async def init_db():
-    """Initialize database connection pool"""
-    global pool
-    pool = await asyncpg.create_pool(
-        user='postgres',
-        password='your_password',  # Move to config
-        database='your_database',
-        host='localhost',
-        port='6432'
-    )
-
-    # Create tables if they don't exist
-    async with pool.acquire() as conn:
-        await conn.execute('''
-            CREATE TABLE IF NOT EXISTS daily_usage (
-                user_id BIGINT REFERENCES users(id),
-                date DATE NOT NULL,
-                usage_count INTEGER DEFAULT 0,
-                PRIMARY KEY (user_id, date)
+    """Initialize the SQLite database"""
+    async with aiosqlite.connect(db_path) as db:
+        await db.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY,
+                username TEXT
             )
         ''')
+        await db.execute('''
+            CREATE TABLE IF NOT EXISTS daily_usage (
+                user_id INTEGER,
+                date DATE NOT NULL,
+                usage_count INTEGER DEFAULT 0,
+                PRIMARY KEY (user_id, date),
+            )
+        ''')
+        await db.commit()
 
 async def is_allowed_message(user_id: int) -> bool:
     """Check if user hasn't exceeded daily limit"""
-    if not pool:
-        await init_db()
-        
-    async with pool.acquire() as conn:
-        try:
+    try:
+        async with aiosqlite.connect(db_path) as db:
             today = datetime.today().date()
-            
+
             # Get current usage
-            row = await conn.fetchrow(
+            cursor = await db.execute(
                 '''
                 SELECT usage_count 
                 FROM daily_usage 
-                WHERE user_id = $1 AND date = $2
+                WHERE user_id = ? AND date = ?
                 ''',
-                user_id, today
+                (user_id, today)
             )
+            row = await cursor.fetchone()
 
-            if row and row['usage_count'] >= 50:
+            if row and row[0] >= 20:
                 return False
 
             # Update or insert usage count
             if row:
-                await conn.execute(
+                await db.execute(
                     '''
                     UPDATE daily_usage 
                     SET usage_count = usage_count + 1 
-                    WHERE user_id = $1 AND date = $2
+                    WHERE user_id = ? AND date = ?
                     ''',
-                    user_id, today
+                    (user_id, today)
                 )
             else:
-                await conn.execute(
+                await db.execute(
                     '''
                     INSERT INTO daily_usage (user_id, date, usage_count) 
-                    VALUES ($1, $2, 1)
+                    VALUES (?, ?, 1)
                     ''',
-                    user_id, today
+                    (user_id, today)
                 )
-            
+            await db.commit()
             return True
-            
-        except Exception as e:
-            logging.error(f"Database error: {e}")
-            return False
 
-# Clean up connection pool on shutdown
-async def cleanup():
-    if pool:
-        await pool.close()
+    except Exception as e:
+        logging.error(f"Database error: {e}")
+        return False
+
+async def add_user(user_id: int, username: str) -> bool:
+    """Add new user to database"""
+    try:
+        async with aiosqlite.connect(db_path) as db:
+            await db.execute(
+                '''
+                INSERT INTO users (id, username) 
+                VALUES (?, ?)
+                ON CONFLICT(id) DO UPDATE SET username=excluded.username
+                ''',
+                (user_id, username)
+            )
+            await db.commit()
+            return True
+    except Exception as e:
+        logging.error(f"Error adding user: {e}")
+        return False
