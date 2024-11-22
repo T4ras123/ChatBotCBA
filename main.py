@@ -7,16 +7,17 @@ from aiogram.types import Message
 from message_handler import ask_gpt4o  # Импортируем новый обработчик
 import asyncio
 
-logging.basicConfig(level=logging.INFO)
+# Настройка логирования
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 router = Router()
 
 @router.message(Command(commands=["start"]))
 async def start_command(message: Message):
     user_name = message.from_user.first_name
     logging.info(f"User {user_name} вызвал команду /start")
-    await message.reply(f"Բարև, {user_name}! Ինչով կարող եմ օգնել?")
+    await message.reply(f"Բարև, {user_name}! Ինչո՞վ կարող եմ օգնել։")
 
-# Подключаем обработчик текстовых сообщений
+# Подключаем обработчик текстовых сообщений с ограничением запросов
 router.message()(ask_gpt4o)
 
 async def main():
