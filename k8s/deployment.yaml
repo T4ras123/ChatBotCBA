@@ -27,7 +27,14 @@ spec:
                 secretKeyRef:
                   name: chatbot-secrets
                   key: TELEGRAM_BOT_TOKEN
-          resources:
-            limits:
-              memory: "256Mi"
-              cpu: "500m"
+          volumeMounts:
+            - name: videos-volume
+              mountPath: /app/videos.json
+              subPath: videos.json
+      volumes:
+        - name: videos-volume
+          configMap:
+            name: videos-config
+            items:
+              - key: videos.json
+                path: videos.json

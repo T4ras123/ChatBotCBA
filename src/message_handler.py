@@ -8,13 +8,35 @@ import re
 from src.db import can_make_request, update_request_data, fetch_user_language_from_db  # Импорт функций для ограничения запросов
 from src.system_messages import messages  # Импорт системных сообщений
 from src.language_selector import get_user_language  # Import get_user_language function
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
-# Асинхронная загрузка данных из videos.json
+videos_data = None
+
+class VideosEventHandler(FileSystemEventHandler):
+    async def on_modified(self, event):
+        if event.src_path.endswith('videos.json'):
+            await load_videos_data()
+
 async def load_videos_data():
+    global videos_data
     async with aiofiles.open("videos.json", mode="r", encoding="utf-8") as file:
         content = await file.read()
-        return json.loads(content)
+        videos_data = json.loads(content)
 
+async def start_watching_videos():
+    await load_videos_data()
+    event_handler = VideosEventHandler()
+    observer = Observer()
+    observer.schedule(event_handler, path='.', recursive=False)
+    observer.start()
+
+    # Keep the observer running
+    while True:
+        await asyncio.sleep(1)
+
+# In your main function or startup code
+asyncio.create_task(start_watching_videos())
 async def ask_gpt4o(message: Message):
     user_id = message.from_user.id
     user_language = await get_user_language(user_id)  # Now it's an async function
