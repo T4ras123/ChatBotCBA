@@ -34,7 +34,7 @@ async def fetch_user_language_from_db(user_id):
                     VALUES (?, 'en', ?)
                 """, (user_id, time.time()))
                 await db.commit()
-                return 'en'
+                return 'hy'
 
 # Функция для установки языка пользователя в базе данных
 async def set_user_language_in_db(user_id, language_code):

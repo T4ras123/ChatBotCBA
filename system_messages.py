@@ -1,4 +1,3 @@
-
 messages = {
     "greeting": {
         "hy": "Բարև, {user_name}! Ինչո՞վ կարող եմ օգնել այսօր։",
