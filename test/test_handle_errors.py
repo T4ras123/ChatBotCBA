@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import AsyncMock, patch
-from handle_errors import handle_errors
+from src.handle_errors import handle_errors
 
 class TestHandleErrors(unittest.IsolatedAsyncioTestCase):
     @patch('handle_errors.logging')

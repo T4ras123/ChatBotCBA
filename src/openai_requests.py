@@ -1,8 +1,8 @@
 import aiohttp
 import asyncio
 import logging
-from config import key  # Импортируем ключ из файла config.py
-from handle_errors import handle_errors  # Импортируем обработку ошибок
+from src.config import key  # Импортируем ключ из файла config.py
+from src.handle_errors import handle_errors  # Импортируем обработку ошибок
 
 # Асинхронный вызов к OpenAI с использованием aiohttp
 async def ask_gpt_async(model, messages, temperature=0.7, max_tokens=500, top_p=1.0, frequency_penalty=0.0, presence_penalty=0.0):

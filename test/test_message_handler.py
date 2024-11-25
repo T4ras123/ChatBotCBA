@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, AsyncMock, Mock
 from aiogram.types import Message
-from message_handler import ask_gpt4o
+from src.message_handler import ask_gpt4o
 
 class TestMessageHandler(unittest.IsolatedAsyncioTestCase):
     @patch('message_handler.ask_gpt_async')

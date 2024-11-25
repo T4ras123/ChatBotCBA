@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-import config
+import src.config as config
 
 class TestConfig(unittest.TestCase):
     @patch('config.os.getenv')

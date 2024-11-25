@@ -1,13 +1,13 @@
 import logging
-from config import token
+from src.config import token
 from aiogram import Bot, Dispatcher, Router
 from aiogram.client.bot import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.types import Message
-from message_handler import ask_gpt4o  # Импортируем обработчик сообщений
-from language_selector import create_language_keyboard, handle_language_selection, get_user_language  # Новый модуль для выбора языка
-from db import init_db, fetch_user_language_from_db  # Инициализация базы данных
-from system_messages import messages  # Импорт системных сообщений
+from src.message_handler import ask_gpt4o  # Импортируем обработчик сообщений
+from src.language_selector import create_language_keyboard, handle_language_selection, get_user_language  # Новый модуль для выбора языка
+from src.db import init_db, fetch_user_language_from_db  # Инициализация базы данных
+from src.system_messages import messages  # Импорт системных сообщений
 import asyncio
 
 # Настройка логирования

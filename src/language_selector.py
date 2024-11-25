@@ -1,7 +1,7 @@
 import logging
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
-from system_messages import messages  # Import system messages
-from db import set_user_language_in_db, fetch_user_language_from_db  # Import database functions
+from src.system_messages import messages  # Import system messages
+from src.db import set_user_language_in_db, fetch_user_language_from_db  # Import database functions
 
 # Словарь для хранения выбранного языка пользователей
 user_languages = {}

@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, AsyncMock
-from main import main
+from src.main import main
 
 class TestMain(unittest.IsolatedAsyncioTestCase):
     @patch('main.Bot')

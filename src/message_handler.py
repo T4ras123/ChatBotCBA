@@ -1,13 +1,13 @@
 import asyncio
 import logging
 import json
-from openai_requests import ask_gpt_async
+from src.openai_requests import ask_gpt_async
 from aiogram.types import Message
 import aiofiles
 import re
-from db import can_make_request, update_request_data, fetch_user_language_from_db  # Импорт функций для ограничения запросов
-from system_messages import messages  # Импорт системных сообщений
-from language_selector import get_user_language  # Import get_user_language function
+from src.db import can_make_request, update_request_data, fetch_user_language_from_db  # Импорт функций для ограничения запросов
+from src.system_messages import messages  # Импорт системных сообщений
+from src.language_selector import get_user_language  # Import get_user_language function
 
 # Асинхронная загрузка данных из videos.json
 async def load_videos_data():

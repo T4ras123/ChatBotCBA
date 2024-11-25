@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch, AsyncMock
-from openai_requests import ask_gpt_async
+from src.openai_requests import ask_gpt_async
 
 class TestOpenAIRequests(unittest.IsolatedAsyncioTestCase):
     @patch('openai_requests.handle_errors')
