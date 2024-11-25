@@ -12,9 +12,36 @@ async def init_db():
                 user_id INTEGER PRIMARY KEY,
                 request_count INTEGER DEFAULT 0,
                 last_request_timestamp REAL,
-                hour_of_request TEXT DEFAULT NULL
+                hour_of_request TEXT DEFAULT NULL,
+                language_code TEXT DEFAULT 'en'  # Новый столбец для языка пользователя
             )
         """)
+        await db.commit()
+
+# Функция для получения языка пользователя из базы данных
+async def fetch_user_language_from_db(user_id):
+    async with aiosqlite.connect(DB_FILE) as db:
+        async with db.execute("""
+            SELECT language_code FROM user_requests WHERE user_id = ?
+        """, (user_id,)) as cursor:
+            row = await cursor.fetchone()
+            if row:
+                return row[0]
+            else:
+                # Если пользователь не найден, добавляем его с языком по умолчанию
+                await db.execute("""
+                    INSERT INTO user_requests (user_id, language_code, last_request_timestamp)
+                    VALUES (?, 'en', ?)
+                """, (user_id, time.time()))
+                await db.commit()
+                return 'en'
+
+# Функция для установки языка пользователя в базе данных
+async def set_user_language_in_db(user_id, language_code):
+    async with aiosqlite.connect(DB_FILE) as db:
+        await db.execute("""
+            UPDATE user_requests SET language_code = ? WHERE user_id = ?
+        """, (language_code, user_id))
         await db.commit()
 
 # Расчет доступных запросов с учетом времени восстановления
