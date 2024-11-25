@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="mb-4">Videos List</h1>
+<a href="{{ url_for('add_video') }}" class="btn btn-primary mb-3">Add New Video</a>
+<div class="row">
+  {% for video in videos %}
+    <div class="col-md-6">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">{{ video.title }}</h5>
+          <p class="card-text">{{ video.text }}</p>
+          <a href="{{ video.link }}" class="btn btn-info" target="_blank">Watch Video</a>
+          <!-- Buttons for edit and delete can be added here -->
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
