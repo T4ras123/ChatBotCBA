@@ -6,7 +6,6 @@ from db import set_user_language_in_db, fetch_user_language_from_db  # Import da
 # Словарь для хранения выбранного языка пользователей
 user_languages = {}
 
-# ...existing code...
 
 # Функция для создания клавиатуры выбора языка
 def create_language_keyboard():
