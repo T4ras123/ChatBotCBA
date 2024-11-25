@@ -13,7 +13,7 @@ async def init_db():
                 request_count INTEGER DEFAULT 0,
                 last_request_timestamp REAL,
                 hour_of_request TEXT DEFAULT NULL,
-                language_code TEXT DEFAULT 'en'  # Новый столбец для языка пользователя
+                language_code TEXT DEFAULT 'en' 
             )
         """)
         await db.commit()
