@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatbot-cba-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chatbot-cba
+  template:
+    metadata:
+      labels:
+        app: chatbot-cba
+    spec:
+      containers:
+        - name: chatbot-cba
+          image: chatbot-cba:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: chatbot-secrets
+                  key: OPENAI_API_KEY
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: chatbot-secrets
+                  key: TELEGRAM_BOT_TOKEN
+          resources:
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
