@@ -5,7 +5,7 @@ from aiogram.client.bot import DefaultBotProperties
 from aiogram.filters import Command
 from aiogram.types import Message
 from message_handler import ask_gpt4o  # Импортируем обработчик сообщений
-from language_selector import create_language_keyboard, handle_language_selection  # Новый модуль для выбора языка
+from language_selector import create_language_keyboard, handle_language_selection, get_user_language  # Новый модуль для выбора языка
 from db import init_db, fetch_user_language_from_db  # Инициализация базы данных
 from system_messages import messages  # Импорт системных сообщений
 import asyncio
@@ -21,7 +21,7 @@ router = Router()
 async def start_command(message: Message):
     user_id = message.from_user.id
     user_name = message.from_user.first_name
-    user_language = await get_user_language(user_id)  # Функция для получения языка пользователя из БД
+    user_language = await get_user_language(user_id)  # Now it's an async function
 
     logging.info(f"User {user_name} вызвал команду /start")
 
@@ -66,12 +66,6 @@ async def main():
     await bot.delete_webhook(drop_pending_updates=True)
     logging.info("Бот успешно запущен и готов к обработке сообщений.")
     await dp.start_polling(bot)
-
-
-async def get_user_language(user_id):
-    # Функция для получения языка пользователя из БД
-    # По умолчанию английский
-    return await fetch_user_language_from_db(user_id)
 
 
 if __name__ == '__main__':

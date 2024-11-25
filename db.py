@@ -28,20 +28,17 @@ async def fetch_user_language_from_db(user_id):
             if row:
                 return row[0]
             else:
-                # Если пользователь не найден, добавляем его с языком по умолчанию
-                await db.execute("""
-                    INSERT INTO user_requests (user_id, language_code, last_request_timestamp)
-                    VALUES (?, 'en', ?)
-                """, (user_id, time.time()))
-                await db.commit()
-                return 'hy'
+                # User not found, return None
+                return None
 
 # Функция для установки языка пользователя в базе данных
 async def set_user_language_in_db(user_id, language_code):
     async with aiosqlite.connect(DB_FILE) as db:
         await db.execute("""
-            UPDATE user_requests SET language_code = ? WHERE user_id = ?
-        """, (language_code, user_id))
+            INSERT INTO user_requests (user_id, language_code, last_request_timestamp)
+            VALUES (?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET language_code = ?, last_request_timestamp = ?
+        """, (user_id, language_code, time.time(), language_code, time.time()))
         await db.commit()
 
 # Расчет доступных запросов с учетом времени восстановления
@@ -69,7 +66,7 @@ async def calculate_available_requests(user_id):
             elapsed_time = time.time() - last_request_timestamp
 
             # Если прошло более 24 часов, сбрасываем запросы
-            if elapsed_time > 24 * 60 * 60:
+            if (elapsed_time > 24 * 60 * 60):
                 return 20
 
             # Рассчитываем восстановленные запросы

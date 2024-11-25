@@ -1,6 +1,7 @@
 import logging
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery
 from system_messages import messages  # Import system messages
+from db import set_user_language_in_db, fetch_user_language_from_db  # Import database functions
 
 # Словарь для хранения выбранного языка пользователей
 user_languages = {}
@@ -37,6 +38,9 @@ async def handle_language_selection(callback: CallbackQuery):
 
     user_languages[user_id] = selected_language
 
+    # Сохраняем язык пользователя в базе данных
+    await set_user_language_in_db(user_id, selected_language)
+
     # Получаем текст уведомления на выбранном языке
     notification_text = messages["language_selection_confirmation"][selected_language].format(language_name=language_name)
 
@@ -47,5 +51,6 @@ async def handle_language_selection(callback: CallbackQuery):
     await callback.answer()
 
 # Функция для получения языка пользователя (по умолчанию английский)
-def get_user_language(user_id):
-    return user_languages.get(user_id, "en")
+async def get_user_language(user_id):
+    language = await fetch_user_language_from_db(user_id)
+    return language or "en"
