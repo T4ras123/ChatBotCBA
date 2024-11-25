@@ -5,6 +5,7 @@ from openai_requests import ask_gpt_async
 from aiogram.types import Message
 import aiofiles
 import re
+from db import add_user, check_daily_usage
 
 # Асинхронная загрузка данных из videos.json
 async def load_videos_data():
@@ -18,6 +19,12 @@ async def ask_gpt4o(message: Message):
 
     # Получаем имя пользователя заранее, чтобы использовать его в любом месте
     user_name = message.from_user.first_name
+    userid = message.from_user.id
+    
+    if not check_daily_usage(userid):
+        await message.reply("Առավելագույն հարցերի քանակը ավելացվել է։ Խնդրում ենք կրկին փորձել այսօր։")
+        return
+    
 
     # Проверяем, есть ли текст в сообщении
     if not message.text:
