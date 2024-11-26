@@ -16,17 +16,12 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
-COPY main.py .
-COPY config.py .
-COPY message_handler.py .
-COPY openai_requests.py .
-COPY db.py .
-COPY videos.json .
+COPY . .
+
 
 # Environment variables will be provided via docker-compose or docker run
 ENV OPENAI_API_KEY=""
 ENV TELEGRAM_BOT_TOKEN=""
 
 # Run the bot
-CMD ["python", "main.py"]
+CMD ["python", "src/main.py"]
