@@ -18,3 +18,5 @@ python-dotenv==1.0.1
 typing_extensions==4.12.2
 watchdog==3.0.0
 yarl==1.16.0
+Flask==2.3.2
+kubernetes==24.0.0
