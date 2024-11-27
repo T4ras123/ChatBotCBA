@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: configmap-updater-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: default  # Use the default ServiceAccount
+roleRef:
+  kind: Role
+  name: configmap-updater
+  apiGroup: rbac.authorization.k8s.io

@@ -1,9 +1,8 @@
 from kubernetes import client, config
-import json
 
 def update_videos_configmap():
-    # Load Kubernetes configuration from local kubeconfig
-    config.load_kube_config()
+    # Load in-cluster Kubernetes configuration
+    config.load_incluster_config()
     v1 = client.CoreV1Api()
 
     # Read the updated videos.json content
@@ -22,6 +21,3 @@ def update_videos_configmap():
         namespace='default',  # Update if using a different namespace
         body=config_map
     )
-
-if __name__ == "__main__":
-    update_videos_configmap()

@@ -16,12 +16,15 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+# Copy application code
+COPY src/ .
 
-
-# Environment variables will be provided via docker-compose or docker run
+# Set environment variables (provided via Secrets)
 ENV OPENAI_API_KEY=""
 ENV TELEGRAM_BOT_TOKEN=""
 
-# Run the bot
-CMD ["python", "src/main.py"]
+# Expose the Flask app port
+EXPOSE 5000
+
+# Start the Flask app
+CMD ["python", "app.py"]
