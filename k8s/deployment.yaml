@@ -1,3 +1,4 @@
+# k8s/deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -12,10 +13,16 @@ spec:
       labels:
         app: chatbot-cba
     spec:
+      initContainers:
+        - name: init-copy-videos
+          image: chatbot-cba:latest
+          command: ['sh', '-c', 'cp /app/videos.json /app/data/videos.json']
+          volumeMounts:
+            - name: videos-storage
+              mountPath: /app/data
       containers:
         - name: chatbot-cba
           image: chatbot-cba:latest
-          imagePullPolicy: IfNotPresent
           env:
             - name: OPENAI_API_KEY
               valueFrom:
@@ -28,13 +35,9 @@ spec:
                   name: chatbot-secrets
                   key: TELEGRAM_BOT_TOKEN
           volumeMounts:
-            - name: videos-volume
-              mountPath: /app/videos.json
-              subPath: videos.json
+            - name: videos-storage
+              mountPath: /app/data
       volumes:
-        - name: videos-volume
-          configMap:
-            name: videos-config
-            items:
-              - key: videos.json
-                path: videos.json
+        - name: videos-storage
+          persistentVolumeClaim:
+            claimName: videos-pvc

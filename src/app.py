@@ -5,12 +5,18 @@ import update_configmap  # Import your update script
 
 
 app = Flask(__name__)
-VIDEOS_FILE = 'videos.json'
+
+VIDEOS_FILE = '/app/data/videos.json'
 
 def load_videos():
+    if not os.path.exists(VIDEOS_FILE):
+        # Initialize videos.json with an empty list
+        with open(VIDEOS_FILE, 'w') as f:
+            json.dump([], f)
+        return []
     with open(VIDEOS_FILE, 'r') as f:
         return json.load(f)
-
+    
 def save_videos(videos):
     with open(VIDEOS_FILE, 'w') as f:
         json.dump(videos, f, indent=4)
