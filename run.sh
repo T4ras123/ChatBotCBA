@@ -7,3 +7,4 @@ kubectl apply -f k8s/rolebinding.yaml
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 kubectl apply -f k8s/pvc.yaml
+minikube service chatbot-cba-service --url
