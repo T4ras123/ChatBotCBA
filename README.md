@@ -1,53 +1,137 @@
 # ChatBotCBA
 
-## Project Structure Overview
+ChatBotCBA is an AI-powered Telegram chatbot designed to assist users with personal finance management by providing useful and precise answers based on a curated database of financial information.
 
-main.py - the core of the project, where all bot functions are defined, such as API requests to GPT and processing user messages. The prompt consists of instructions for the bot, task description, user prompt, and video materials with descriptions from which the model extracts information.
-config.py - bot key and OpenAI token for accessing their API.
-videos.json - a collection of video titles, descriptions, and links. They are included in the prompt to provide information for GPT chat.
+## Table of Contents
 
-### Libraries Used
+- [Features](#features)
+- [Architecture](#architecture)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
-- json - working with JSON files.
-- aiogram - TG bot communication, allows handling and responding to user messages.
-- aiohttp - HTTP client for aiogram.
-- asyncio - asynchronous requests, an extension of aiogram for asynchronous request handling.
+## Features
 
-## Code Logic Analysis
+- **Personalized Responses**: Delivers customized answers to user queries about financial topics.
+- **Multilingual Support**: Communicates in Armenian, Russian, and English based on user preference.
+- **OpenAI GPT Integration**: Leverages GPT-4 to generate coherent and context-aware responses.
+- **Persistent Data Storage**: Utilizes Kubernetes Persistent Volume Claims for data persistence.
+- **Spam Protection**: Implements rate limiting to prevent excessive requests and reduce costs.
 
-- gpt_request() - configures the request to GPT, connects to the API with aiohttp, and sends the request. If successful, it returns a response from GPT; if there’s an error, it raises it.
-- cmd_start() - processes the start command from the user, returning a greeting.
-- ask_gpt4o() - accepts a message from the user, sends a request to OpenAI using the ask_gpt_async() function with a prompt consisting of instructions, the user message, and processed data from videos, such as title, description, and link. If the request is successful, it replies to the user; if it fails, it returns an error and logs it. The model determines the user’s language and responds in the language of the question.
-- main() - the main function that calls other functions, configuring the bot and dispatcher.
+## Architecture
 
-## Data Flow Analysis
+- **Telegram Bot**: Handles user interactions via Telegram using the `aiogram` library.
+- **OpenAI Module**: Manages asynchronous requests to the OpenAI API.
+- **Flask Web App**: Provides a web interface for managing video content and transcripts.
+- **Kubernetes Deployment**: Containerized application deployed on Kubernetes for scalability.
+- **Database**: Uses SQLite for storing user preferences and request limits.
 
-1. The user message arrives at the bot in the ask_gpt4o() function.
-   1.1 If it’s the “start” command, the bot returns a greeting.
-   1.2 If it’s a question, the bot creates a prompt from instructions, data from videos.json, and the user’s question.
-2. The prompt is sent to GPT through the gpt_request() function.
-   2.1 If the request is successful, the bot responds with GPT’s answer.
-   2.2 If there’s an error, it returns an error message.
+## Installation
 
-## Suggested Improvements
+### Prerequisites
 
-- Pre-parse the contents of videos.json outside the function, as its content does not change, and this process is performed for each user.
-  - This will speed up the bot's performance by reducing calculations for each user.
+- **Python 3.12**
+- **Docker**
+- **Kubernetes Cluster** (e.g., Minikube)
+- **Telegram Bot Token**
+- **OpenAI API Key**
 
-- Send prompts to GPT in English, as it handles them much better.
-  - GPT has far more English tokens, which improves its understanding of instructions and questions, leading to better answers.
+### Clone the Repository
 
-- Write a transcript of the video instead of attaching links, as video analysis is a very costly process.
-  - Analyzing videos, especially in Armenian, is complex and expensive for GPT, leading to poor context understanding and information loss. Providing a transcript in English instead will make it faster, more accurate, and cheaper.
+```sh
+git clone https://github.com/your-username/chatbot-cba.git
+cd chatbot-cba
+```
 
-- Write error messages in three languages or translate them into the user’s language.
-  - To improve the user experience.
+### Install Dependencies
 
-- Add the user’s name + message in the error log.
-  - For more informative logs.
+```sh
+pip install -r requirements.txt
+```
 
-- Add spam protection to prevent users from making too many requests, which would lead to high API costs.
-  - Protects the bot from overload and prevents overspending due to spammers.
+## Usage
 
-- Create a repository for easier tracking of changes.
-  - Facilitates easier editing and tracking of the code.
+### Running Locally
+
+To start the Telegram bot locally:
+
+```sh
+python src/main.py
+```
+
+### Running the Flask App
+
+To launch the web interface for managing videos:
+
+```sh
+python src/app.py
+```
+
+Visit `http://localhost:5000` in your browser.
+
+## Configuration
+
+### Environment Variables
+
+Create a `.env` file in the project root with the following content:
+
+```sh
+OPENAI_API_KEY=your_openai_api_key
+TELEGRAM_BOT_TOKEN=your_telegram_bot_token
+```
+
+### Kubernetes Secrets
+
+For deployment, configure secrets in `k8s/secrets.yaml` (ensure this file is excluded from version control):
+
+```sh
+apiVersion: v1
+kind: Secret
+metadata:
+  name: chatbot-secrets
+type: Opaque
+data:
+  OPENAI_API_KEY: base64_encoded_openai_api_key
+  TELEGRAM_BOT_TOKEN: base64_encoded_telegram_bot_token
+```
+
+## Deployment
+
+### Build Docker Image
+
+```sh
+docker build -t chatbot-cba:latest .
+```
+
+### Deploy to Kubernetes
+
+Apply the Kubernetes configurations:
+
+```sh
+kubectl apply -f k8s/
+```
+
+### Access the Service
+
+Retrieve the service URL:
+
+```sh
+minikube service chatbot-cba-service --url
+```
+
+## Contributing
+
+Contributions are welcome! Please follow these steps:
+
+1. Fork the repository.
+2. Create a new branch: `git checkout -b feature/your-feature`.
+3. Commit your changes: `git commit -am 'Add new feature'`.
+4. Push to the branch: `git push origin feature/your-feature`.
+5. Submit a pull request.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
