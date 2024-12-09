@@ -1,12 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for
 import json
 import os
-import update_configmap  # Import your update script
+
 
 
 app = Flask(__name__)
 
-VIDEOS_FILE = '/app/data/videos.json'
+VIDEOS_FILE = 'videos.json'
 
 def load_videos():
     if not os.path.exists(VIDEOS_FILE):
@@ -44,7 +44,6 @@ def save_videos(videos):
     with open(VIDEOS_FILE, 'w') as f:
         json.dump(videos, f, indent=4)
     # Update the ConfigMap after saving
-    update_configmap.update_videos_configmap()
 
 # Additional routes for edit and delete can be added similarly
 
