@@ -53,9 +53,9 @@ def parse_abcfinance_live(base_url, max_depth=1, interval=60):
             print(f'Failed to retrieve {current_url}: {e}')
 
     # Save data to JSON file
-    with open('abcfinance_live_data.json', 'w', encoding='utf-8') as f:
+    with open('site_data.json', 'w', encoding='utf-8') as f:
         json.dump(list(data.values()), f, ensure_ascii=False, indent=4)
-    print('Data saved to abcfinance_live_data.json')
+    print('Data saved to site_data.json')
 
 def monitor_abcfinance():
     base_url = 'https://abcfinance.am'
