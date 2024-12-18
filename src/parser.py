@@ -40,7 +40,7 @@ def translate_text(text, translator, max_length=5000, retries=3, delay=5):
             try:
                 translated_chunk = translator.translate(chunk)
                 translated_chunks.append(translated_chunk)
-                break  # Success, break out of retry loop
+                break   
             except Exception as e:
                 if attempt < retries - 1:
                     print(f"Translation failed (attempt {attempt + 1}), retrying in {delay} seconds...")
